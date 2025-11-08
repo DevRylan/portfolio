@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 import original from 'react95/dist/themes/original.js';
-import { Window, WindowContent } from 'react95';
+import { useNavigate } from 'react-router-dom';
+import { Window, WindowContent, Button, TextInput } from 'react95';
 import userImg from './assets/userPic.gif';
-import adminImg from './assets/adminPic.gif';
 import VistaBackground from './assets/dark_vista.jpg';
+import { FaArrowRight } from 'react-icons/fa';
 import FloatingDots from './FloatingDots';
 
-function App() {
+function GuestLogin() {
   const navigate = useNavigate();
-  const [hovered, setHovered] = useState(null);
+  const [hovered, setHovered] = useState(false);
 
   const vistaFrameStyle = {
     width: 100,
@@ -30,14 +30,14 @@ function App() {
     transition: 'transform 0.2s ease, box-shadow 0.2s ease',
   };
 
-  const imgStyle = (isHovered) => ({
+  const imgStyle = {
     width: 96,
     height: 96,
     borderRadius: 12,
     objectFit: 'cover',
-    filter: isHovered ? 'brightness(1.25)' : 'brightness(1)',
+    filter: hovered ? 'brightness(1.25)' : 'brightness(1)',
     transition: 'filter 0.3s ease',
-  });
+  };
 
   return (
     <ThemeProvider theme={original}>
@@ -73,43 +73,57 @@ function App() {
           <WindowContent
             style={{
               display: 'flex',
-              justifyContent: 'center',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: 60,
+              justifyContent: 'center',
+              gap: 16,
             }}
           >
             <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={() => setHovered('guest')}
-              onMouseLeave={() => setHovered(null)}
-              onClick={() => navigate('/guest')}
+              style={vistaFrameStyle}
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
             >
-              <div style={vistaFrameStyle}>
-                <img src={userImg} alt="User" style={imgStyle(hovered === 'guest')} />
-              </div>
-              <span style={{ color: 'white', fontSize: 16 }}>Guest</span>
+              <img src={userImg} alt="User" style={imgStyle} />
             </div>
+
+            <span style={{ color: 'white', fontSize: 16, marginBottom: 12 }}>
+              Guest
+            </span>
+
             <div
               style={{
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
-                cursor: 'pointer',
+                gap: 8,
               }}
-              onMouseEnter={() => setHovered('admin')}
-              onMouseLeave={() => setHovered(null)}
-              onClick={() => navigate('/admin')}
             >
-              <div style={vistaFrameStyle}>
-                <img src={adminImg} alt="Admin" style={imgStyle(hovered === 'admin')} />
-              </div>
-              <span style={{ color: 'white', fontSize: 16 }}>Administrator</span>
+              <TextInput
+                placeholder="Enter password"
+                type="password"
+                style={{
+                  width: 180,
+                  fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+                }}
+              />
+              <Button
+                style={{
+                  fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+                }}
+              >
+                <FaArrowRight size={12} />
+              </Button>
             </div>
+
+            <Button
+              style={{
+                marginTop: 16,
+                fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+              }}
+              onClick={() => navigate('/')}
+            >
+              Switch User
+            </Button>
           </WindowContent>
         </Window>
       </div>
@@ -117,4 +131,4 @@ function App() {
   );
 }
 
-export default App;
+export default GuestLogin;
