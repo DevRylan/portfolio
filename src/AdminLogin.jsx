@@ -28,6 +28,7 @@ function AdminLogin() {
             boxShadow: 'none',
             border: 'none',
             textAlign: 'center',
+            
           }}
         >
           <WindowHeader style={{ textAlign: 'center', marginBottom: 24 }}>

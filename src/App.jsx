@@ -5,6 +5,8 @@ import original from 'react95/dist/themes/original.js';
 import { Window, WindowContent, WindowHeader } from 'react95';
 import userImg from './assets/userImg.png';
 import adminImg from './assets/adminImg.png';
+import VistaBackground from './assets/dark_vista.jpg';
+import FloatingDots from './FloatingDots';
 
 function App() {
   const navigate = useNavigate();
@@ -13,7 +15,10 @@ function App() {
     <ThemeProvider theme={original}>
       <div
         style={{
-          background: 'teal',
+          backgroundImage: `url(${VistaBackground})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
           height: '100vh',
           width: '100vw',
           display: 'flex',
@@ -21,14 +26,19 @@ function App() {
           alignItems: 'center',
           margin: 0,
           padding: 0,
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
+        <FloatingDots />
         <Window
           style={{
             background: 'transparent',
             boxShadow: 'none',
             border: 'none',
             textAlign: 'center',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <WindowHeader style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -57,6 +67,7 @@ function App() {
                 style={{
                   width: 96,
                   height: 96,
+                  border: '3px solid grey',
                   borderRadius: 12,
                   marginBottom: 8,
                 }}
