@@ -71,7 +71,6 @@ function GuestLogin() {
         )}
 
 
-
         <div
           style={{
             position: 'fixed',
