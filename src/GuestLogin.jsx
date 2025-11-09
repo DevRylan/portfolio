@@ -1,42 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider } from 'styled-components';
 import original from 'react95/dist/themes/original.js';
-import { useNavigate } from 'react-router-dom';
-import { Window, WindowContent, Button, TextInput } from 'react95';
-import userImg from './assets/userPic.gif';
+import { Button } from 'react95';
+import DraggableIcon from './components/DraggableIcon';
+import DraggableWindow from './components/DraggableWindow';
+import ComputerIcon from './assets/MyComputer.gif';
+import FolderIcon from './assets/FileExplorer.gif';
+import RecycleIcon from './assets/RecycleBin.gif';
+import AboutMeIcon from './assets/AboutMe.gif';
 import VistaBackground from './assets/dark_vista.jpg';
-import { FaArrowRight } from 'react-icons/fa';
-import FloatingDots from './FloatingDots';
+import WindowsIcon from './assets/windows.png';
 
 function GuestLogin() {
-  const navigate = useNavigate();
-  const [hovered, setHovered] = useState(false);
+  const [time, setTime] = useState('');
+  const [showAboutMe, setShowAboutMe] = useState(false);
+  const [minimizedAboutMe, setMinimizedAboutMe] = useState(false);
 
-  const vistaFrameStyle = {
-    width: 100,
-    height: 100,
-    borderRadius: 16,
-    padding: 4,
-    background:
-      'linear-gradient(145deg, rgba(255,255,255,0.6), rgba(180,220,255,0.4))',
-    boxShadow:
-      'inset 0 1px 2px rgba(255,255,255,0.7), inset 0 -1px 2px rgba(0,0,0,0.3), 0 0 8px rgba(0,0,0,0.5)',
-    backdropFilter: 'blur(6px)',
-    border: '1px solid rgba(255,255,255,0.6)',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-  };
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-  const imgStyle = {
-    width: 96,
-    height: 96,
-    borderRadius: 12,
-    objectFit: 'cover',
-    filter: hovered ? 'brightness(1.25)' : 'brightness(1)',
-    transition: 'filter 0.3s ease',
+  useEffect(() => {
+    setShowAboutMe(true);
+  }, []);
+
+  const handleOpenAboutMe = () => {
+    setShowAboutMe(true);
+    setMinimizedAboutMe(false);
   };
 
   return (
@@ -46,86 +42,72 @@ function GuestLogin() {
           backgroundImage: `url(${VistaBackground})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
           height: '100vh',
           width: '100vw',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          margin: 0,
-          padding: 0,
-          position: 'relative',
           overflow: 'hidden',
+          position: 'relative',
           fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
         }}
       >
-        <FloatingDots />
-        <Window
+        <DraggableIcon icon={RecycleIcon} label="Recycle Bin" initialX={0} initialY={30} />
+        <DraggableIcon icon={ComputerIcon} label="My Computer" initialX={0} initialY={130} />
+        <DraggableIcon icon={FolderIcon} label="Projects" initialX={0} initialY={230} />
+        <DraggableIcon
+          icon={AboutMeIcon}
+          label="About Me"
+          initialX={0}
+          initialY={330}
+          onDoubleClick={handleOpenAboutMe}
+        />
+
+        {showAboutMe && (
+          <DraggableWindow
+            title="Notepad - About Me"
+            src="/about.html"
+            onClose={() => setShowAboutMe(false)}
+            onMinimize={() => setMinimizedAboutMe(true)}
+            minimized={minimizedAboutMe}
+          />
+        )}
+
+        <div
           style={{
-            background: 'transparent',
-            boxShadow: 'none',
-            border: 'none',
-            textAlign: 'center',
-            position: 'relative',
-            zIndex: 1,
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            width: '100%',
+            height: 36,
+            backgroundColor: '#0a246a',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 8px',
           }}
         >
-          <WindowContent
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 16,
-            }}
-          >
-            <div
-              style={vistaFrameStyle}
-              onMouseEnter={() => setHovered(true)}
-              onMouseLeave={() => setHovered(false)}
-            >
-              <img src={userImg} alt="User" style={imgStyle} />
-            </div>
-
-            <span style={{ color: 'white', fontSize: 16, marginBottom: 12 }}>
-              Guest
-            </span>
-
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-              }}
-            >
-              <TextInput
-                placeholder="Enter password"
-                type="password"
-                style={{
-                  width: 180,
-                  fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
-                }}
-              />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Button variant="menu"><img src={WindowsIcon} style={{marginRight: "2px"}}/>Start</Button>
+            {showAboutMe && minimizedAboutMe && (
               <Button
+                onClick={() => setMinimizedAboutMe(false)}
                 style={{
-                  fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+                  backgroundColor: '#c0c0c0',
+                  color: 'black',
                 }}
               >
-                <FaArrowRight size={12} />
+                Notepad - About Me
               </Button>
-            </div>
-
-            <Button
-              style={{
-                marginTop: 16,
-                fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
-              }}
-              onClick={() => navigate('/')}
-            >
-              Switch User
-            </Button>
-          </WindowContent>
-        </Window>
+            )}
+          </div>
+          <div
+            style={{
+              color: 'white',
+              fontSize: 12,
+              fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+            }}
+          >
+            {time}
+          </div>
+        </div>
       </div>
     </ThemeProvider>
   );
