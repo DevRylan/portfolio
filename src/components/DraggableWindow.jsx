@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Window, WindowHeader, WindowContent, Button } from 'react95';
 
-function DraggableWindow({ title, src, onClose, onMinimize, minimized }) {
+function DraggableWindow({ title, src, onClose, onMinimize, minimized, children, borderless }) {
   const [position, setPosition] = useState({ x: 400, y: 120 });
   const [size, setSize] = useState({ width: 460, height: 420 });
   const [dragging, setDragging] = useState(false);
@@ -47,25 +47,19 @@ function DraggableWindow({ title, src, onClose, onMinimize, minimized }) {
 
         if (resizeDir.includes('e')) newWidth = Math.max(MIN_WIDTH, resizeOffset.width + dx);
         if (resizeDir.includes('s')) newHeight = Math.max(MIN_HEIGHT, resizeOffset.height + dy);
-
         if (resizeDir.includes('w')) {
           const intendedWidth = resizeOffset.width - dx;
           if (intendedWidth > MIN_WIDTH) {
             newWidth = intendedWidth;
             newX = resizeOffset.left + dx;
-          } else {
-            newWidth = MIN_WIDTH;
-          }
+          } else newWidth = MIN_WIDTH;
         }
-
         if (resizeDir.includes('n')) {
           const intendedHeight = resizeOffset.height - dy;
           if (intendedHeight > MIN_HEIGHT) {
             newHeight = intendedHeight;
             newY = resizeOffset.top + dy;
-          } else {
-            newHeight = MIN_HEIGHT;
-          }
+          } else newHeight = MIN_HEIGHT;
         }
 
         setSize({ width: newWidth, height: newHeight });
@@ -92,8 +86,30 @@ function DraggableWindow({ title, src, onClose, onMinimize, minimized }) {
 
   if (minimized) return null;
 
+  // Borderless version (for Winamp etc.)
+  if (borderless) {
+    return (
+      <div
+        onMouseDown={handleMouseDown}
+        style={{
+          position: 'absolute',
+          left: position.x,
+          top: position.y,
+          width: size.width,
+          height: size.height,
+          zIndex: 20,
+          cursor: dragging ? 'grabbing' : 'grab',
+          userSelect: 'none',
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+
+  // Regular framed React95 window
   return (
-    <Window
+    <Window className="draggable-layer"
       style={{
         position: 'absolute',
         left: position.x,
@@ -101,6 +117,7 @@ function DraggableWindow({ title, src, onClose, onMinimize, minimized }) {
         width: size.width,
         height: size.height,
         zIndex: 10,
+        boxShadow: '3px 3px 0px #000', // classic 95 hard shadow
       }}
     >
       <WindowHeader
@@ -110,27 +127,33 @@ function DraggableWindow({ title, src, onClose, onMinimize, minimized }) {
           justifyContent: 'space-between',
           alignItems: 'center',
           cursor: 'grab',
+          userSelect: 'none',
         }}
       >
         <span>{title}</span>
         <div>
-          <Button {...{ square: true }} size="sm" onClick={onMinimize}>_</Button>
-          <Button {...{ square: true }} size="sm" onClick={onClose}>X</Button>
+          <Button square size="sm" onClick={onMinimize}>_</Button>
+          <Button square size="sm" onClick={onClose}>X</Button>
         </div>
       </WindowHeader>
 
       <WindowContent style={{ padding: 0 }}>
-        <iframe
-          src={src}
-          title={title}
-          style={{
-            width: '100%',
-            height: size.height - 60,
-            border: 'none',
-          }}
-        ></iframe>
+        {children ? (
+          <div style={{ width: '100%', height: size.height - 60 }}>{children}</div>
+        ) : (
+          <iframe
+            src={src}
+            title={title}
+            style={{
+              width: '100%',
+              height: size.height - 60,
+              border: 'none',
+            }}
+          />
+        )}
       </WindowContent>
 
+      {/* Resize handles */}
       <div onMouseDown={(e) => handleResizeDown(e, 'n')}
         style={{ position: 'absolute', top: 0, left: '50%', width: '100%', height: 6, cursor: 'ns-resize', transform: 'translateX(-50%)' }} />
       <div onMouseDown={(e) => handleResizeDown(e, 's')}

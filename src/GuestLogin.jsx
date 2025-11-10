@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ThemeProvider } from 'styled-components';
 import original from 'react95/dist/themes/original.js';
 import { Button } from 'react95';
+import WinampPlayer from "./components/WinampPlayer";
 import DraggableIcon from './components/DraggableIcon';
 import DraggableWindow from './components/DraggableWindow';
 import ComputerIcon from './assets/MyComputer.gif';
@@ -20,6 +21,7 @@ function GuestLogin() {
   const [time, setTime] = useState('');
   const [windows, setWindows] = useState([]);
   const [showStartMenu, setShowStartMenu] = useState(false);
+  const [showWinamp, setShowWinamp] = useState(false);
 
   const startMenuRef = useRef(null);
   const startButtonRef = useRef(null);
@@ -34,20 +36,22 @@ function GuestLogin() {
     return () => clearInterval(timer);
   }, []);
 
-  // Automatically open About Me
   useEffect(() => {
     openWindow('about', 'Notepad - About Me', '/about.html');
   }, []);
 
-  const openWindow = (id, title, src) => {
+  const openWindow = (id, title, src, component, borderless = false) => {
     setWindows((prev) => {
-      const exists = prev.find((w) => w.id === id);
-      if (exists) {
+      const existing = prev.find((w) => w.id === id);
+      if (existing) {
         return prev.map((w) =>
           w.id === id ? { ...w, minimized: false, visible: true } : w
         );
       }
-      return [...prev, { id, title, src, minimized: false, visible: true }];
+      return [
+        ...prev,
+        { id, title, src, component, minimized: false, visible: true, borderless },
+      ];
     });
     setShowStartMenu(false);
   };
@@ -64,7 +68,6 @@ function GuestLogin() {
     );
   };
 
-  // Hide Start Menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
@@ -86,13 +89,17 @@ function GuestLogin() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showStartMenu]);
 
- const startMenuItems = [
-  { id: 'about', title: 'Notepad - About Me', src: '/about.html', icon: '📝' },
-  { id: 'calculator', title: 'Calculator', src: '/calculator.html', icon: '🧮' },
-  { id: 'winamp', title: 'Winamp', src: '/winamp.html', icon: '🎵' },
-  { id: 'jspaint', title: 'JSPaint', src: 'https://jspaint.app/', icon: '🎨' },
-];
-
+  const startMenuItems = [
+    { id: 'about', title: 'Notepad - About Me', src: '/about.html', icon: '📝' },
+    { id: 'calculator', title: 'Calculator', src: '/calculator.html', icon: '🧮' },
+    {
+      id: 'winamp',
+      title: 'Winamp',
+      icon: '🎵',
+      onClick: () => setShowWinamp(true),
+    },
+    { id: 'jspaint', title: 'JSPaint', src: 'https://jspaint.app/', icon: '🎨' },
+  ];
 
   return (
     <ThemeProvider theme={original}>
@@ -108,7 +115,6 @@ function GuestLogin() {
           fontFamily: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
         }}
       >
-        {/* Desktop Icons */}
         <DraggableIcon icon={RecycleIcon} label="Recycle Bin" initialX={0} initialY={30} />
         <DraggableIcon icon={ComputerIcon} label="My Computer" initialX={0} initialY={130} />
         <DraggableIcon icon={FolderIcon} label="Projects" initialX={0} initialY={230} />
@@ -125,22 +131,50 @@ function GuestLogin() {
         <DraggableIcon icon={ChatIcon} label="Chat" initialX={100} initialY={130} />
         <DraggableIcon icon={ContactMeIcon} label="Contact Me!" initialX={100} initialY={230} />
 
-        {/* Active Windows */}
         {windows.map(
           (w) =>
             w.visible && (
               <DraggableWindow
                 key={w.id}
                 title={w.title}
-                src={w.src}
-                minimized={w.minimized}
                 onMinimize={() => toggleMinimize(w.id)}
                 onClose={() => closeWindow(w.id)}
-              />
+                minimized={w.minimized}
+                borderless={w.borderless}
+              >
+                {w.component ? (
+                  w.component
+                ) : (
+                  <iframe
+                    src={w.src}
+                    title={w.title}
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                  />
+                )}
+              </DraggableWindow>
             )
         )}
 
-        {/* Start Menu */}
+        {showWinamp && (
+          <div
+            style={{
+              position: "absolute",
+              left: "400px",
+              top: "120px",
+              zIndex: 10,
+              cursor: "grab",
+            }}
+            onMouseDown={(e) => {
+              const allWindows = document.querySelectorAll(".draggable-layer");
+              allWindows.forEach((el) => (el.style.zIndex = 10));
+              e.currentTarget.style.zIndex = 100;
+            }}
+            className="draggable-layer"
+          >
+            <WinampPlayer onClose={() => setShowWinamp(false)} />
+          </div>
+        )}
+
         {showStartMenu && (
           <div
             ref={startMenuRef}
@@ -170,7 +204,14 @@ function GuestLogin() {
                   alignItems: 'center',
                   gap: 8,
                 }}
-                onClick={() => openWindow(item.id, item.title, item.src)}
+                onClick={() => {
+                  setShowStartMenu(false);
+                  if (item.onClick) {
+                    item.onClick();
+                  } else {
+                    openWindow(item.id, item.title, item.src, item.component, item.borderless);
+                  }
+                }}
               >
                 {item.icon} {item.title}
               </div>
@@ -178,7 +219,6 @@ function GuestLogin() {
           </div>
         )}
 
-        {/* Taskbar */}
         <div
           style={{
             position: 'fixed',
@@ -208,19 +248,22 @@ function GuestLogin() {
               Start
             </Button>
 
-            {/* Taskbar Tabs */}
-            {windows.map((w) => (
-              <Button
-                key={w.id}
-                onClick={() => toggleMinimize(w.id)}
-                style={{
-                  backgroundColor: !w.minimized ? '#d0d0d0' : '#c0c0c0',
-                  color: 'black',
-                }}
-              >
-                {w.title}
-              </Button>
-            ))}
+            {windows
+              .filter((w) => w.visible)
+              .map((w) => (
+                <Button
+                  key={w.id}
+                  active={!w.minimized}
+                  onClick={() => toggleMinimize(w.id)}
+                  style={{
+                    fontSize: 12,
+                    padding: '4px 8px',
+                    backgroundColor: w.minimized ? '#c0c0c0' : '#dfdfdf',
+                  }}
+                >
+                  {w.title ? w.title.replace(/ - About Me| - Calculator/, '') : 'App'}
+                </Button>
+              ))}
           </div>
 
           <div
