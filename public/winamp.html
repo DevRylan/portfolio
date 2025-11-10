@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Winamp</title>
+    <style>
+      body {
+        background-color: #1c1c1c;
+        font-family: "Tahoma", sans-serif;
+        color: #00ff00;
+        margin: 0;
+        padding: 10px;
+      }
+      h3 {
+        margin: 0;
+        color: #00ff00;
+      }
+      .winamp {
+        border: 2px solid #404040;
+        background: #2a2a2a;
+        width: 300px;
+        padding: 10px;
+      }
+      button {
+        background: #3a3a3a;
+        border: 1px solid #707070;
+        color: #00ff00;
+        font-size: 12px;
+        margin: 3px;
+        cursor: pointer;
+      }
+      button:active {
+        border: 1px inset #202020;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="winamp">
+      <h3>Winamp Player</h3>
+      <audio id="player" controls style="width:100%; margin-top:6px;">
+        <source src="/assets/sample.mp3" type="audio/mpeg" />
+      </audio>
+      <div style="margin-top:6px;">
+        <button onclick="player.play()">▶ Play</button>
+        <button onclick="player.pause()">⏸ Pause</button>
+        <button onclick="player.currentTime=0">⏮ Restart</button>
+      </div>
+      <small style="color:#ccc;">Winamp™ aesthetic player</small>
+    </div>
+  </body>
+</html>
