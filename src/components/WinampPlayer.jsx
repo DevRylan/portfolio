@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from "react";
+import digitalAngel from "../assets/MyAudio.mp3";
+import circuitry from "../assets/MyAudio2.mp3";
 import Webamp from "webamp";
 
 let webampInstance = null; // Persist between re-renders
@@ -14,11 +16,16 @@ function WinampPlayer({ onClose }) {
 
     webampInstance = new Webamp({
       initialTracks: [
-        {
-          metaData: { artist: "Rylan Weldon", title: "Digital Angel" },
-          url: "/assets/DigitalAngel.mp3",
-        },
-      ],
+  {
+    metaData: { artist: "Rye", title: "Digital Angel" },
+    url: digitalAngel,
+  },
+  {
+    metaData: { artist: "Rye", title: "Oh the Circuitry" },
+    url: circuitry,
+  }
+],
+
       // 👇 No skin key at all
     });
 
@@ -29,7 +36,6 @@ function WinampPlayer({ onClose }) {
       });
     });
 
-    // ❌ don't close on cleanup; prevents closing on re-renders
   }, [onClose]);
 
   return (
